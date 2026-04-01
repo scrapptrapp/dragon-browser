@@ -1,3 +1,4 @@
+cat > ~/dragon-browser/index.html << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -110,21 +111,6 @@ webview.active{display:flex}
     <div class="dd-item" onclick="tabNavigate('https://google.com')"><span class="icon">🔍</span> Google</div>
     <div class="dd-item" onclick="tabNavigate('https://github.com')"><span class="icon">🐙</span> GitHub</div>
     <div class="dd-item" onclick="tabNavigate('https://youtube.com')"><span class="icon">▶</span> YouTube</div>
-    <div class="dd-item" onclick="tabNavigate('https://wikipedia.org')"><span class="icon">📖</span> Wikipedia</div>
-    <div class="dd-item" onclick="tabNavigate('https://reddit.com')"><span class="icon">👾</span> Reddit</div>
-    <div class="dd-item" onclick="tabNavigate('https://twitch.tv')"><span class="icon">🎮</span> Twitch</div>
-  </div>
-  <div class="dd-section">
-    <div class="dd-label">Browser</div>
-    <div class="dd-item" onclick="openPanel('bookmarks')"><span class="icon">★</span> Bookmarks</div>
-    <div class="dd-item" onclick="openPanel('history')"><span class="icon">📜</span> History</div>
-    <div class="dd-item" onclick="bookmarkCurrent()"><span class="icon">＋</span> Bookmark This Page</div>
-  </div>
-  <div class="dd-section">
-    <div class="dd-label">System</div>
-    <div class="dd-item" onclick="openPanel('settings')"><span class="icon">⚙</span> Settings</div>
-    <div class="dd-item" onclick="clearAllData()"><span class="icon">🗑</span> Clear All Data</div>
-    <div class="dd-item" onclick="showAbout()"><span class="icon">ℹ</span> About Dragon Browser</div>
   </div>
 </div>
 <div id="webviews">
@@ -136,76 +122,42 @@ webview.active{display:flex}
       <input type="text" id="home-input" placeholder="Search or enter URL..." autocomplete="off">
       <button type="submit">▶</button>
     </form>
-    <div class="quick-links">
-      <a class="ql" onclick="tabNavigate('https://duckduckgo.com')">DuckDuckGo</a>
-      <a class="ql" onclick="tabNavigate('https://youtube.com')">YouTube</a>
-      <a class="ql" onclick="tabNavigate('https://github.com')">GitHub</a>
-      <a class="ql" onclick="tabNavigate('https://reddit.com')">Reddit</a>
-      <a class="ql" onclick="tabNavigate('https://wikipedia.org')">Wikipedia</a>
-      <a class="ql" onclick="tabNavigate('https://twitch.tv')">Twitch</a>
-    </div>
   </div>
 </div>
-<div id="side-panel">
-  <div class="sp-header">
-    <h3 id="sp-title">BOOKMARKS</h3>
-    <button class="sp-close" onclick="closePanel()">✕</button>
-  </div>
-  <div class="sp-body" id="sp-body"></div>
 </div>
-</div>
-<a class="creator-tag" id="creatorTag" onclick="openCreatorLink()">
-  <div class="creator-av">V</div>
-  <div class="creator-text">MADE BY<br><span id="creatorName">VOID @ DRAGON</span></div>
-</a>
 <script>
 let tabs=[],activeTabId=null,tabCounter=0
-let bookmarks=JSON.parse(localStorage.getItem('db_bookmarks')||'[]')
-let hist=JSON.parse(localStorage.getItem('db_history')||'[]')
-let settings=JSON.parse(localStorage.getItem('db_settings')||'{}')let searchEngine=settings.engine||'https://duckduckgo.com/?q='
-let creatorName=settings.creator||'VOID @ DRAGON'
-let creatorLink=settings.creatorLink||'https://github.com'
-document.getElementById('creatorName').textContent=creatorName
+let searchEngine='https://duckduckgo.com/?q='
 
 function newTab(url){
   const id=++tabCounter
   const wv=document.createElement('webview')
   wv.setAttribute('partition','persist:dragon')
-  wv.src=url||'about:blank'
   wv.style.cssText='width:100%;flex:1;display:none;'
   document.getElementById('webviews').appendChild(wv)
+  
   const tab={id,url:url||'',title:url||'New Tab',webview:wv,isHome:!url}
   tabs.push(tab)
-  wv.addEventListener('page-title-updated',e=>{tab.title=e.title;renderTabs()})
-  wv.addEventListener('did-navigate',e=>{
-    tab.url=e.url;tab.isHome=false
-    if(activeTabId===id){document.getElementById('urlbar').value=e.url;addHist(e.url,tab.title)}
-    renderTabs()
+
+  wv.addEventListener('did-finish-load', () => {
+    if(activeTabId===id) document.getElementById('urlbar').value = wv.getURL()
   })
-  wv.addEventListener('did-navigate-in-page',e=>{tab.url=e.url;if(activeTabId===id)document.getElementById('urlbar').value=e.url})
-  wv.addEventListener('new-window',e=>newTab(e.url))
-  switchTab(id);renderTabs();return id
+
+  if(url) wv.src = url
+  switchTab(id)
+  return id
 }
 
 function switchTab(id){
   activeTabId=id
-  tabs.forEach(t=>{t.webview.style.display='none';t.webview.classList.remove('active')})
+  tabs.forEach(t=>{t.webview.style.display='none'})
   const hs=document.getElementById('home-screen')
-  hs.classList.remove('active');hs.style.display='none'
+  hs.style.display='none'
   const tab=tabs.find(t=>t.id===id)
   if(!tab)return
-  if(tab.isHome||!tab.url){hs.style.display='flex';hs.classList.add('active');document.getElementById('urlbar').value=''}
-  else{tab.webview.style.display='flex';tab.webview.classList.add('active');document.getElementById('urlbar').value=tab.url}
+  if(tab.isHome){hs.style.display='flex';document.getElementById('urlbar').value=''}
+  else{tab.webview.style.display='flex';document.getElementById('urlbar').value=tab.webview.getURL()}
   renderTabs()
-}
-
-function closeTab(id){
-  const idx=tabs.findIndex(t=>t.id===id)
-  if(idx===-1)return
-  tabs[idx].webview.remove();tabs.splice(idx,1)
-  if(tabs.length===0)newTab()
-  else if(activeTabId===id)switchTab(tabs[Math.min(idx,tabs.length-1)].id)
-  else renderTabs()
 }
 
 function renderTabs(){
@@ -213,7 +165,7 @@ function renderTabs(){
   tabs.forEach(tab=>{
     const el=document.createElement('div')
     el.className='tab'+(tab.id===activeTabId?' active':'')
-    el.innerHTML='<span class="tab-title">'+escHtml(tab.title||'New Tab')+'</span><span class="tab-close" onclick="event.stopPropagation();closeTab('+tab.id+')">✕</span>'
+    el.innerHTML='<span class="tab-title">'+(tab.title||'New Tab')+'</span>'
     el.onclick=()=>switchTab(tab.id);c.appendChild(el)
   })
 }
@@ -226,17 +178,15 @@ function resolveUrl(q){
 }
 
 function tabNavigate(url){
-  closeMenu()
   const tab=tabs.find(t=>t.id===activeTabId);if(!tab)return
-  tab.isHome=false;tab.url=url;tab.webview.src=url
+  tab.isHome=false;tab.webview.src=url
   tab.webview.style.display='flex'
   document.getElementById('home-screen').style.display='none'
-  document.getElementById('urlbar').value=url
 }
 
 function homeSearch(e){
   e.preventDefault()
-  const q=document.getElementById('home-input').value.trim();if(!q)return
+  const q=document.getElementById('home-input').value.trim()
   const url=resolveUrl(q);if(url)tabNavigate(url)
 }
 
@@ -244,84 +194,13 @@ function urlbarKey(e){
   if(e.key==='Enter'){const url=resolveUrl(document.getElementById('urlbar').value);if(url)tabNavigate(url)}
 }
 
-function navBack(){activeWebview()?.goBack()}
-function navForward(){activeWebview()?.goForward()}
-function navReload(){activeWebview()?.reload()}
-function activeWebview(){return tabs.find(t=>t.id===activeTabId)?.webview}
-
 function goHome(){
-  closeMenu()
   const tab=tabs.find(t=>t.id===activeTabId);if(!tab)return
-  tab.isHome=true;tab.url='';tab.title='New Tab';switchTab(activeTabId);renderTabs()
+  tab.isHome=true;switchTab(activeTabId)
 }
-
-function toggleMenu(){document.getElementById('dropdown').classList.toggle('open')}
-function closeMenu(){document.getElementById('dropdown').classList.remove('open')}
-document.addEventListener('click',e=>{if(!e.target.closest('#dropdown')&&!e.target.closest('.menu-btn'))closeMenu()})
-
-function bookmarkCurrent(){
-  closeMenu()
-  const tab=tabs.find(t=>t.id===activeTabId)
-  if(!tab||!tab.url){alert('Nothing to bookmark.');return}
-  if(bookmarks.find(b=>b.url===tab.url)){alert('Already bookmarked!');return}
-  bookmarks.unshift({url:tab.url,title:tab.title||tab.url})
-  localStorage.setItem('db_bookmarks',JSON.stringify(bookmarks))
-  alert('Bookmarked: '+(tab.title||tab.url))
-}
-
-function addHist(url,title){
-  if(!url||url==='about:blank')return
-  hist.unshift({url,title:title||url,time:Date.now()})
-  if(hist.length>500)hist=hist.slice(0,500)
-  localStorage.setItem('db_history',JSON.stringify(hist))
-}
-
-function openPanel(type){
-  closeMenu()
-  const panel=document.getElementById('side-panel')
-  const title=document.getElementById('sp-title')
-  const body=document.getElementById('sp-body')
-  panel.classList.add('open')
-  if(type==='bookmarks'){
-    title.textContent='★ BOOKMARKS'
-    body.innerHTML=bookmarks.length?bookmarks.map((b,i)=>'<div class="sp-item" onclick="tabNavigate(\''+(b.url)+'\');closePanel()"><span class="sp-title">'+escHtml(b.title||b.url)+'</span><span class="sp-del" onclick="event.stopPropagation();deleteBookmark('+i+')">✕</span></div>').join(''):'<div class="sp-empty">No bookmarks yet.</div>'
-  }
-  if(type==='history'){
-    title.textContent='📜 HISTORY'
-    body.innerHTML=hist.length?hist.map((h,i)=>'<div class="sp-item" onclick="tabNavigate(\''+(h.url)+'\');closePanel()"><span class="sp-title">'+escHtml(h.title||h.url)+'</span><span class="sp-del" onclick="event.stopPropagation();deleteHistory('+i+')">✕</span></div>').join(''):'<div class="sp-empty">No history yet.</div>'
-  }
-  if(type==='settings'){
-    title.textContent='⚙ SETTINGS'
-    body.innerHTML='<div class="setting-row"><label>SEARCH ENGINE</label><select id="set-engine"><option value="https://duckduckgo.com/?q=" '+( searchEngine.includes('duckduckgo')?'selected':'' )+'>DuckDuckGo</option><option value="https://www.google.com/search?q=" '+( searchEngine.includes('google')?'selected':'' )+'>Google</option><option value="https://www.bing.com/search?q=" '+( searchEngine.includes('bing')?'selected':'' )+'>Bing</option></select></div><div class="setting-row"><label>CREATOR NAME</label><input type="text" id="set-creator" value="'+escHtml(creatorName)+'"></div><div class="setting-row"><label>CREATOR LINK</label><input type="text" id="set-creator-link" value="'+escHtml(creatorLink)+'"></div><button class="setting-save" onclick="saveSettings()">Save Settings</button>'
-  }
-}
-
-function deleteBookmark(i){bookmarks.splice(i,1);localStorage.setItem('db_bookmarks',JSON.stringify(bookmarks));openPanel('bookmarks')}
-function deleteHistory(i){hist.splice(i,1);localStorage.setItem('db_history',JSON.stringify(hist));openPanel('history')}
-function closePanel(){document.getElementById('side-panel').classList.remove('open')}
-
-function saveSettings(){
-  searchEngine=document.getElementById('set-engine').value
-  creatorName=document.getElementById('set-creator').value.trim()||'VOID @ DRAGON'
-  creatorLink=document.getElementById('set-creator-link').value.trim()||'https://github.com'
-  localStorage.setItem('db_settings',JSON.stringify({engine:searchEngine,creator:creatorName,creatorLink}))
-  document.getElementById('creatorName').textContent=creatorName
-  alert('Settings saved!');closePanel()
-}
-
-function clearAllData(){
-  closeMenu()
-  if(!confirm('Clear all data?'))return
-  localStorage.clear();bookmarks=[];hist=[]
-  searchEngine='https://duckduckgo.com/?q='
-  alert('All data cleared.')
-}
-
-function showAbout(){closeMenu();alert('Dragon Browser v1.0\nBuilt with Electron\nMade by VOID @ DRAGON')}
-function openCreatorLink(){const tab=tabs.find(t=>t.id===activeTabId);if(tab)tabNavigate(creatorLink)}
-function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
 newTab()
 </script>
 </body>
 </html>
+EOF
