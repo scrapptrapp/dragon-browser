@@ -3,106 +3,176 @@ cat > ~/dragon-browser/index.html << 'EOF'
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Dragon Browser - Private</title>
+<title>Dragon Private Browser</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--tor-purple:#7d4698;--tor-dark:#420c5d;--tor-bg:#310a46;--text:#fff;--font:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif}
+:root{--tor-purple:#7d4698;--tor-dark:#420c5d;--tor-bg:#310a46;--green:#00ff41;--text:#fff;--font:'Segoe UI', sans-serif}
 html,body{height:100vh;width:100vw;overflow:hidden;background:linear-gradient(180deg, var(--tor-dark) 0%, var(--tor-bg) 100%);color:var(--text);font-family:var(--font)}
 body{display:flex;flex-direction:column}
 
-#titlebar{height:38px;background:rgba(0,0,0,0.3);display:flex;align-items:center;padding:0 12px;gap:8px;-webkit-app-region:drag;user-select:none}
-.win-btn{width:28px;height:28px;border:none;background:none;color:#ccc;cursor:pointer;-webkit-app-region:no-drag;font-size:14px}
-.win-btn:hover{background:rgba(255,255,255,0.1);color:#fff}
+/* Titlebar & Tabs */
+#titlebar{height:38px;background:rgba(0,0,0,0.4);display:flex;align-items:center;padding:0 10px;gap:5px;-webkit-app-region:drag}
+#tabs-container{display:flex;gap:4px;flex:1;overflow-x:auto;-webkit-app-region:no-drag}
+.tab{padding:6px 15px;background:rgba(255,255,255,0.1);border-radius:8px 8px 0 0;font-size:12px;cursor:pointer;min-width:120px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;justify-content:space-between;align-items:center}
+.tab.active{background:var(--tor-purple);border-bottom:2px solid var(--green)}
+.tab-close{margin-left:8px;opacity:0.5}
+.tab-close:hover{opacity:1;color:#ff4444}
+#new-tab-btn{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:0 10px;-webkit-app-region:no-drag}
 
+/* Navbar */
 #navbar{height:50px;background:rgba(0,0,0,0.2);display:flex;align-items:center;padding:0 15px;gap:12px;border-bottom:1px solid rgba(255,255,255,0.05)}
 .nav-btn{background:none;border:none;color:#fff;cursor:pointer;font-size:18px;opacity:0.7}
-.nav-btn:hover{opacity:1}
-#urlbar{flex:1;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#fff;padding:6px 12px;font-size:13px;outline:none}
+#urlbar{flex:1;background:rgba(0,0,0,0.4);border:1px solid var(--tor-purple);border-radius:20px;color:#fff;padding:6px 18px;font-size:13px;outline:none}
+#urlbar:focus{border-color:var(--green);box-shadow:0 0 10px rgba(0,255,65,0.2)}
 
-#webviews{flex:1;position:relative;display:flex;flex-direction:column}
-webview{width:100%;flex:1;display:none;background:#fff}
+/* Content */
+#webviews{flex:1;position:relative}
+webview{width:100%;height:100%;display:none;background:#fff}
 webview.active{display:flex}
 
-#home-screen{display:none;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center}
+/* Home Screen */
+#home-screen{display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center}
 #home-screen.active{display:flex}
-.tor-logo{width:80px;height:80px;background:var(--tor-purple);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:20px;box-shadow:0 0 30px rgba(125,70,152,0.4)}
-h1{font-size:42px;font-weight:600;margin-bottom:10px;letter-spacing:1px}
+.dragon-logo{font-size:80px;margin-bottom:10px;filter:drop-shadow(0 0 15px var(--green))}
+h1{font-size:38px;margin-bottom:5px}
+.sub{color:var(--green);font-family:monospace;margin-bottom:30px;letter-spacing:2px}
 
-.search-container{background:#fff;border-radius:10px;width:550px;padding:5px;display:flex;align-items:center;margin-top:30px;box-shadow:0 10px 30px rgba(0,0,0,0.3)}
-.ddg-logo{padding:0 15px;font-size:20px}
-.search-container input{flex:1;border:none;padding:12px;font-size:16px;outline:none;color:#333}
-.toggle-wrap{display:flex;align-items:center;gap:10px;padding-right:15px;color:#666;font-size:14px;border-left:1px solid #eee;margin-left:10px}
+.search-box{background:#fff;border-radius:30px;width:500px;padding:5px 20px;display:flex;align-items:center;box-shadow:0 10px 40px rgba(0,0,0,0.4)}
+.search-box input{flex:1;border:none;padding:12px;font-size:16px;outline:none;color:#333}
+.search-box button{background:none;border:none;font-size:20px;cursor:pointer}
 
-.status-msg{margin-top:25px;font-size:14px;opacity:0.8}
+/* Bookmarks Bar */
+#bookmarks-bar{height:30px;background:rgba(0,0,0,0.1);display:flex;align-items:center;padding:0 15px;gap:10px;font-size:11px}
+.bm-item{color:#ccc;text-decoration:none;cursor:pointer}
+.bm-item:hover{color:var(--green)}
 </style>
 </head>
 <body>
+
 <div id="titlebar">
-  <span style="flex:1; font-size:12px; opacity:0.6">New Tab</span>
-  <button class="win-btn" onclick="window.electronAPI.minimize()">─</button>
-  <button class="win-btn" onclick="window.electronAPI.maximize()">□</button>
-  <button class="win-btn" onclick="window.electronAPI.close()">✕</button>
+  <div id="tabs-container"></div>
+  <button id="new-tab-btn" onclick="createNewTab()">+</button>
+  <div style="flex:1"></div>
+  <button class="nav-btn" style="font-size:12px" onclick="window.electronAPI.close()">✕</button>
 </div>
+
 <div id="navbar">
-  <button class="nav-btn" onclick="navBack()">←</button>
-  <button class="nav-btn" onclick="navForward()">→</button>
-  <button class="nav-btn" onclick="navReload()">↻</button>
-  <input type="text" id="urlbar" placeholder="Search with DuckDuckGo or enter address" onkeydown="urlbarKey(event)">
+  <button class="nav-btn" onclick="activeWV().goBack()">←</button>
+  <button class="nav-btn" onclick="activeWV().goForward()">→</button>
+  <button class="nav-btn" onclick="activeWV().reload()">↻</button>
+  <input type="text" id="urlbar" placeholder="Search Privately..." onkeydown="if(event.key==='Enter') navigate(this.value)">
+  <button class="nav-btn" onclick="addBookmark()">★</button>
 </div>
+
+<div id="bookmarks-bar"></div>
+
 <div id="webviews">
-  <div id="home-screen" class="active">
-    <div class="tor-logo">🌐</div>
-    <h1>Explore. Privately.</h1>
-    <form class="search-container" onsubmit="homeSearch(event)">
-      <span class="ddg-logo">🦆</span>
-      <input type="text" id="home-input" placeholder="Search with DuckDuckGo" autocomplete="off">
-      <div class="toggle-wrap">
-        <span>Onionize</span>
-        <input type="checkbox" checked>
-      </div>
+  <div id="home-screen">
+    <div class="dragon-logo">🐉</div>
+    <h1>DRAGON PRIVATE</h1>
+    <div class="sub">ENCRYPTED // ANONYMOUS</div>
+    <form class="search-box" onsubmit="event.preventDefault(); navigate(document.getElementById('home-input').value)">
+      <input type="text" id="home-input" placeholder="Search with DuckDuckGo..." autocomplete="off">
+      <button type="submit">🔍</button>
     </form>
-    <div class="status-msg">You’re ready for the world’s most private browsing experience.</div>
   </div>
 </div>
 
 <script>
-let searchEngine='https://duckduckgo.com/?q='
-const wv=document.createElement('webview')
-wv.setAttribute('partition','persist:dragon')
-document.getElementById('webviews').appendChild(wv)
+let tabs = [];
+let activeTabId = null;
+let bookmarks = JSON.parse(localStorage.getItem('dragon_bookmarks') || '[]');
 
-function resolveUrl(q){
-  q=q.trim(); if(!q)return null
-  if(q.startsWith('http://')||q.startsWith('https://'))return q
-  if(q.includes('.')&&!q.includes(' '))return 'https://'+q
-  return searchEngine+encodeURIComponent(q)
+function createNewTab(url = null) {
+  const id = Date.now();
+  const wv = document.createElement('webview');
+  wv.setAttribute('partition', 'persist:dragon');
+  wv.style.display = 'none';
+  document.getElementById('webviews').appendChild(wv);
+
+  const tab = { id, wv, title: 'New Tab', isHome: !url };
+  tabs.push(tab);
+
+  wv.addEventListener('did-finish-load', () => {
+    tab.title = wv.getTitle();
+    tab.isHome = false;
+    updateUI();
+  });
+
+  if(url) navigate(url, id);
+  switchTab(id);
 }
 
-function navigate(url){
-  const target = resolveUrl(url)
-  if(!target) return
-  document.getElementById('home-screen').classList.remove('active')
-  wv.style.display='flex'
-  wv.src = target
-  document.getElementById('urlbar').value = target
+function switchTab(id) {
+  activeTabId = id;
+  tabs.forEach(t => {
+    t.wv.classList.remove('active');
+    t.wv.style.display = 'none';
+  });
+  
+  const tab = tabs.find(t => t.id === id);
+  const home = document.getElementById('home-screen');
+  
+  if(tab.isHome) {
+    home.classList.add('active');
+    document.getElementById('urlbar').value = '';
+  } else {
+    home.classList.remove('active');
+    tab.wv.classList.add('active');
+    tab.wv.style.display = 'flex';
+    document.getElementById('urlbar').value = tab.wv.getURL();
+  }
+  updateUI();
 }
 
-function homeSearch(e){
-  e.preventDefault()
-  navigate(document.getElementById('home-input').value)
+function closeTab(id, e) {
+  e.stopPropagation();
+  const index = tabs.findIndex(t => t.id === id);
+  tabs[index].wv.remove();
+  tabs.splice(index, 1);
+  if(tabs.length === 0) createNewTab();
+  else switchTab(tabs[Math.max(0, index - 1)].id);
 }
 
-function urlbarKey(e){
-  if(e.key==='Enter') navigate(document.getElementById('urlbar').value)
+function navigate(val, id = activeTabId) {
+  const tab = tabs.find(t => t.id === id);
+  let url = val.trim();
+  if(!url.startsWith('http')) {
+    if(url.includes('.') && !url.includes(' ')) url = 'https://' + url;
+    else url = 'https://duckduckgo.com/?q=' + encodeURIComponent(url);
+  }
+  tab.isHome = false;
+  tab.wv.src = url;
+  switchTab(id);
 }
 
-function navBack(){wv.goBack()}
-function navForward(){wv.goForward()}
-function navReload(){wv.reload()}
+function updateUI() {
+  const container = document.getElementById('tabs-container');
+  container.innerHTML = '';
+  tabs.forEach(t => {
+    const el = document.createElement('div');
+    el.className = `tab ${t.id === activeTabId ? 'active' : ''}`;
+    el.innerHTML = `<span>${t.title}</span><span class="tab-close" onclick="closeTab(${t.id}, event)">✕</span>`;
+    el.onclick = () => switchTab(t.id);
+    container.appendChild(el);
+  });
 
-wv.addEventListener('did-finish-load', () => {
-  document.getElementById('urlbar').value = wv.getURL()
-})
+  const bmBar = document.getElementById('bookmarks-bar');
+  bmBar.innerHTML = bookmarks.map(b => `<a class="bm-item" onclick="navigate('${b.url}')">${b.name}</a>`).join(' | ');
+}
+
+function addBookmark() {
+  const tab = tabs.find(t => t.id === activeTabId);
+  if(tab.isHome) return;
+  bookmarks.push({ name: tab.wv.getTitle().substring(0,15), url: tab.wv.getURL() });
+  localStorage.setItem('dragon_bookmarks', JSON.stringify(bookmarks));
+  updateUI();
+}
+
+function activeWV() { return tabs.find(t => t.id === activeTabId).wv; }
+
+// Start with one tab
+createNewTab();
 </script>
 </body>
 </html>
