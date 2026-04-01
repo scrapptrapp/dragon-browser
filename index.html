@@ -3,203 +3,106 @@ cat > ~/dragon-browser/index.html << 'EOF'
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Dragon Browser</title>
+<title>Dragon Browser - Private</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--green:#00ff41;--green-dim:#00cc33;--green-glow:rgba(0,255,65,0.18);--bg:#0d0d0d;--bg2:#1a1a1a;--bg3:#222;--border:#333;--text:#00ff41;--text-dim:#555;--font:'Courier New',monospace}
-html,body{height:100vh;width:100vw;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font)}
+:root{--tor-purple:#7d4698;--tor-dark:#420c5d;--tor-bg:#310a46;--text:#fff;--font:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif}
+html,body{height:100vh;width:100vw;overflow:hidden;background:linear-gradient(180deg, var(--tor-dark) 0%, var(--tor-bg) 100%);color:var(--text);font-family:var(--font)}
 body{display:flex;flex-direction:column}
-#titlebar{height:32px;background:#111;display:flex;align-items:center;padding:0 12px;gap:8px;border-bottom:1px solid var(--border);-webkit-app-region:drag;user-select:none;flex-shrink:0}
-#titlebar span{font-size:11px;color:var(--text-dim);flex:1;text-align:center}
-.win-btn{width:26px;height:20px;border:1px solid var(--border);background:none;color:var(--text-dim);cursor:pointer;border-radius:3px;font-size:11px;-webkit-app-region:no-drag;display:flex;align-items:center;justify-content:center}
-.win-btn:hover{background:var(--bg3);color:var(--green);border-color:var(--green)}
-.win-btn.close:hover{background:#550000;color:#ff4444;border-color:#ff4444}
-#tabbar{height:36px;background:var(--bg2);display:flex;align-items:flex-end;padding:0 8px;gap:2px;border-bottom:2px solid var(--green);overflow-x:auto;flex-shrink:0}
-#tabbar::-webkit-scrollbar{height:3px}
-#tabbar::-webkit-scrollbar-thumb{background:var(--green)}
-.tab{height:28px;padding:0 10px;background:var(--bg3);border:1px solid var(--border);border-bottom:none;border-radius:6px 6px 0 0;cursor:pointer;display:flex;align-items:center;gap:6px;min-width:120px;max-width:200px;font-size:11px;color:#888;white-space:nowrap;overflow:hidden;flex-shrink:0}
-.tab.active{background:var(--bg);border-color:var(--green);color:var(--green)}
-.tab .tab-title{flex:1;overflow:hidden;text-overflow:ellipsis}
-.tab .tab-close{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:#555}
-.tab .tab-close:hover{background:var(--green);color:#000}
-#new-tab-btn{height:26px;width:26px;background:none;border:1px solid var(--border);border-radius:4px;color:#888;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;align-self:center}
-#new-tab-btn:hover{border-color:var(--green);color:var(--green)}
-#navbar{height:44px;background:var(--bg2);display:flex;align-items:center;padding:0 10px;gap:6px;border-bottom:1px solid var(--border);flex-shrink:0}
-.nav-btn{background:none;border:1px solid var(--border);color:#888;cursor:pointer;padding:3px 8px;font-size:13px;border-radius:4px;font-family:var(--font);flex-shrink:0}
-.nav-btn:hover{border-color:var(--green);color:var(--green)}
-#urlbar{flex:1;background:#000;border:1px solid var(--border);border-radius:20px;color:var(--green);padding:5px 14px;font-size:12px;outline:none;font-family:var(--font)}
-#urlbar:focus{border-color:var(--green);box-shadow:0 0 8px var(--green-glow)}
-.menu-btn{background:none;border:1px solid var(--border);color:#888;cursor:pointer;padding:3px 10px;font-size:18px;border-radius:4px;line-height:1;flex-shrink:0}
-.menu-btn:hover{border-color:var(--green);color:var(--green)}
-#dropdown{display:none;position:fixed;top:113px;right:12px;background:var(--bg2);border:1px solid var(--green);border-radius:8px;min-width:220px;z-index:9999;box-shadow:0 0 20px var(--green-glow);overflow:hidden}
-#dropdown.open{display:block}
-.dd-section{padding:4px 0;border-bottom:1px solid var(--border)}
-.dd-section:last-child{border-bottom:none}
-.dd-label{padding:6px 14px 2px;font-size:9px;color:var(--text-dim);letter-spacing:1px}
-.dd-item{padding:9px 14px;cursor:pointer;font-size:12px;color:var(--green);display:flex;align-items:center;gap:10px}
-.dd-item:hover{background:var(--green);color:#000}
-.dd-item .icon{width:16px;text-align:center;font-size:13px}
-#webviews{flex:1;position:relative;display:flex;flex-direction:column;overflow:hidden}
-webview{width:100%;flex:1;display:none}
+
+#titlebar{height:38px;background:rgba(0,0,0,0.3);display:flex;align-items:center;padding:0 12px;gap:8px;-webkit-app-region:drag;user-select:none}
+.win-btn{width:28px;height:28px;border:none;background:none;color:#ccc;cursor:pointer;-webkit-app-region:no-drag;font-size:14px}
+.win-btn:hover{background:rgba(255,255,255,0.1);color:#fff}
+
+#navbar{height:50px;background:rgba(0,0,0,0.2);display:flex;align-items:center;padding:0 15px;gap:12px;border-bottom:1px solid rgba(255,255,255,0.05)}
+.nav-btn{background:none;border:none;color:#fff;cursor:pointer;font-size:18px;opacity:0.7}
+.nav-btn:hover{opacity:1}
+#urlbar{flex:1;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#fff;padding:6px 12px;font-size:13px;outline:none}
+
+#webviews{flex:1;position:relative;display:flex;flex-direction:column}
+webview{width:100%;flex:1;display:none;background:#fff}
 webview.active{display:flex}
-#home-screen{display:none;flex-direction:column;align-items:center;justify-content:center;flex:1;background:var(--bg)}
+
+#home-screen{display:none;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center}
 #home-screen.active{display:flex}
-.dragon-logo{font-size:90px;line-height:1;margin-bottom:14px;animation:pulse 3s ease-in-out infinite}
-@keyframes pulse{0%,100%{filter:drop-shadow(0 0 10px #00ff41)}50%{filter:drop-shadow(0 0 28px #00ff41) drop-shadow(0 0 50px #00ff4155)}}
-#home-screen h1{font-size:30px;letter-spacing:6px;text-shadow:0 0 12px var(--green);margin-bottom:6px}
-.home-sub{font-size:10px;color:var(--text-dim);margin-bottom:28px}
-.search-wrap{background:var(--bg2);border:2px solid var(--green);border-radius:28px;padding:10px 20px;width:480px;display:flex;gap:8px;box-shadow:0 0 18px var(--green-glow)}
-.search-wrap input{background:none;border:none;color:#fff;outline:none;width:100%;font-family:var(--font);font-size:14px}
-.search-wrap button{background:none;border:none;color:var(--green);cursor:pointer;font-size:18px;padding:0}
-.search-wrap button:hover{color:#fff}
-.quick-links{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;justify-content:center}
-.ql{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:12px;color:var(--green);cursor:pointer;text-decoration:none}
-.ql:hover{border-color:var(--green);background:var(--bg3)}
-#side-panel{position:fixed;top:112px;left:0;bottom:0;width:300px;background:var(--bg2);border-right:1px solid var(--green);z-index:800;display:none;flex-direction:column}
-#side-panel.open{display:flex}
-.sp-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.sp-header h3{font-size:14px;letter-spacing:2px}
-.sp-close{background:none;border:none;color:#888;cursor:pointer;font-size:18px}
-.sp-close:hover{color:var(--green)}
-.sp-body{flex:1;overflow-y:auto;padding:8px 0}
-.sp-body::-webkit-scrollbar{width:4px}
-.sp-body::-webkit-scrollbar-thumb{background:var(--green)}
-.sp-item{padding:10px 16px;cursor:pointer;font-size:12px;color:#aaa;border-bottom:1px solid #1a1a1a;display:flex;align-items:center;gap:8px;overflow:hidden}
-.sp-item:hover{background:var(--bg3);color:var(--green)}
-.sp-item .sp-title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sp-item .sp-del{color:#444;font-size:14px;flex-shrink:0}
-.sp-item .sp-del:hover{color:#ff4444}
-.sp-empty{padding:20px 16px;color:var(--text-dim);font-size:12px;text-align:center}
-.setting-row{padding:12px 16px;border-bottom:1px solid #1a1a1a;display:flex;flex-direction:column;gap:6px}
-.setting-row label{font-size:10px;color:var(--text-dim);letter-spacing:1px}
-.setting-row select,.setting-row input[type=text]{background:#000;border:1px solid var(--green);color:var(--green);padding:5px 10px;border-radius:4px;font-family:var(--font);font-size:12px;outline:none}
-.setting-save{margin:14px 16px;background:var(--green);color:#000;border:none;padding:8px;border-radius:6px;cursor:pointer;font-family:var(--font);font-weight:bold;font-size:13px;width:calc(100% - 32px)}
-.setting-save:hover{background:var(--green-dim)}
-.creator-tag{position:fixed;bottom:14px;right:14px;background:var(--bg2);border:2px solid var(--green);border-radius:12px;display:flex;align-items:center;gap:10px;padding:9px 13px;color:var(--green);z-index:5000;text-decoration:none;cursor:pointer;box-shadow:0 0 10px var(--green-glow)}
-.creator-tag:hover{box-shadow:0 0 22px rgba(0,255,65,0.4)}
-.creator-av{width:36px;height:36px;border-radius:8px;background:var(--green);color:#000;font-weight:bold;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.creator-text{font-size:11px;line-height:1.5;font-weight:bold}
-.creator-text span{display:block;color:#555;font-weight:normal;font-size:10px}
-#main{display:flex;flex-direction:column;flex:1;overflow:hidden}
+.tor-logo{width:80px;height:80px;background:var(--tor-purple);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:20px;box-shadow:0 0 30px rgba(125,70,152,0.4)}
+h1{font-size:42px;font-weight:600;margin-bottom:10px;letter-spacing:1px}
+
+.search-container{background:#fff;border-radius:10px;width:550px;padding:5px;display:flex;align-items:center;margin-top:30px;box-shadow:0 10px 30px rgba(0,0,0,0.3)}
+.ddg-logo{padding:0 15px;font-size:20px}
+.search-container input{flex:1;border:none;padding:12px;font-size:16px;outline:none;color:#333}
+.toggle-wrap{display:flex;align-items:center;gap:10px;padding-right:15px;color:#666;font-size:14px;border-left:1px solid #eee;margin-left:10px}
+
+.status-msg{margin-top:25px;font-size:14px;opacity:0.8}
 </style>
 </head>
 <body>
 <div id="titlebar">
-  <span>🐉 Dragon Browser</span>
+  <span style="flex:1; font-size:12px; opacity:0.6">New Tab</span>
   <button class="win-btn" onclick="window.electronAPI.minimize()">─</button>
   <button class="win-btn" onclick="window.electronAPI.maximize()">□</button>
-  <button class="win-btn close" onclick="window.electronAPI.close()">✕</button>
-</div>
-<div id="main">
-<div id="tabbar">
-  <div id="tabs-container"></div>
-  <button id="new-tab-btn" onclick="newTab()">+</button>
+  <button class="win-btn" onclick="window.electronAPI.close()">✕</button>
 </div>
 <div id="navbar">
-  <button class="nav-btn" onclick="navBack()">◀</button>
-  <button class="nav-btn" onclick="navForward()">▶</button>
-  <button class="nav-btn" onclick="navReload()">↺</button>
-  <button class="nav-btn" onclick="goHome()">🏠</button>
-  <input type="text" id="urlbar" placeholder="Search or enter URL..." onkeydown="urlbarKey(event)">
-  <button class="nav-btn" onclick="bookmarkCurrent()">★</button>
-  <button class="menu-btn" id="menuBtn" onclick="toggleMenu()">☰</button>
-</div>
-<div id="dropdown">
-  <div class="dd-section">
-    <div class="dd-label">Quick Access</div>
-    <div class="dd-item" onclick="tabNavigate('https://duckduckgo.com')"><span class="icon">🦆</span> DuckDuckGo</div>
-    <div class="dd-item" onclick="tabNavigate('https://google.com')"><span class="icon">🔍</span> Google</div>
-    <div class="dd-item" onclick="tabNavigate('https://github.com')"><span class="icon">🐙</span> GitHub</div>
-    <div class="dd-item" onclick="tabNavigate('https://youtube.com')"><span class="icon">▶</span> YouTube</div>
-  </div>
+  <button class="nav-btn" onclick="navBack()">←</button>
+  <button class="nav-btn" onclick="navForward()">→</button>
+  <button class="nav-btn" onclick="navReload()">↻</button>
+  <input type="text" id="urlbar" placeholder="Search with DuckDuckGo or enter address" onkeydown="urlbarKey(event)">
 </div>
 <div id="webviews">
-  <div id="home-screen">
-    <div class="dragon-logo">🐉</div>
-    <h1>DRAGON BROWSER</h1>
-    <div class="home-sub">Powered by Electron · Built by VOID</div>
-    <form class="search-wrap" onsubmit="homeSearch(event)">
-      <input type="text" id="home-input" placeholder="Search or enter URL..." autocomplete="off">
-      <button type="submit">▶</button>
+  <div id="home-screen" class="active">
+    <div class="tor-logo">🌐</div>
+    <h1>Explore. Privately.</h1>
+    <form class="search-container" onsubmit="homeSearch(event)">
+      <span class="ddg-logo">🦆</span>
+      <input type="text" id="home-input" placeholder="Search with DuckDuckGo" autocomplete="off">
+      <div class="toggle-wrap">
+        <span>Onionize</span>
+        <input type="checkbox" checked>
+      </div>
     </form>
+    <div class="status-msg">You’re ready for the world’s most private browsing experience.</div>
   </div>
 </div>
-</div>
+
 <script>
-let tabs=[],activeTabId=null,tabCounter=0
 let searchEngine='https://duckduckgo.com/?q='
-
-function newTab(url){
-  const id=++tabCounter
-  const wv=document.createElement('webview')
-  wv.setAttribute('partition','persist:dragon')
-  wv.style.cssText='width:100%;flex:1;display:none;'
-  document.getElementById('webviews').appendChild(wv)
-  
-  const tab={id,url:url||'',title:url||'New Tab',webview:wv,isHome:!url}
-  tabs.push(tab)
-
-  wv.addEventListener('did-finish-load', () => {
-    if(activeTabId===id) document.getElementById('urlbar').value = wv.getURL()
-  })
-
-  if(url) wv.src = url
-  switchTab(id)
-  return id
-}
-
-function switchTab(id){
-  activeTabId=id
-  tabs.forEach(t=>{t.webview.style.display='none'})
-  const hs=document.getElementById('home-screen')
-  hs.style.display='none'
-  const tab=tabs.find(t=>t.id===id)
-  if(!tab)return
-  if(tab.isHome){hs.style.display='flex';document.getElementById('urlbar').value=''}
-  else{tab.webview.style.display='flex';document.getElementById('urlbar').value=tab.webview.getURL()}
-  renderTabs()
-}
-
-function renderTabs(){
-  const c=document.getElementById('tabs-container');c.innerHTML=''
-  tabs.forEach(tab=>{
-    const el=document.createElement('div')
-    el.className='tab'+(tab.id===activeTabId?' active':'')
-    el.innerHTML='<span class="tab-title">'+(tab.title||'New Tab')+'</span>'
-    el.onclick=()=>switchTab(tab.id);c.appendChild(el)
-  })
-}
+const wv=document.createElement('webview')
+wv.setAttribute('partition','persist:dragon')
+document.getElementById('webviews').appendChild(wv)
 
 function resolveUrl(q){
-  q=q.trim();if(!q)return null
+  q=q.trim(); if(!q)return null
   if(q.startsWith('http://')||q.startsWith('https://'))return q
   if(q.includes('.')&&!q.includes(' '))return 'https://'+q
   return searchEngine+encodeURIComponent(q)
 }
 
-function tabNavigate(url){
-  const tab=tabs.find(t=>t.id===activeTabId);if(!tab)return
-  tab.isHome=false;tab.webview.src=url
-  tab.webview.style.display='flex'
-  document.getElementById('home-screen').style.display='none'
+function navigate(url){
+  const target = resolveUrl(url)
+  if(!target) return
+  document.getElementById('home-screen').classList.remove('active')
+  wv.style.display='flex'
+  wv.src = target
+  document.getElementById('urlbar').value = target
 }
 
 function homeSearch(e){
   e.preventDefault()
-  const q=document.getElementById('home-input').value.trim()
-  const url=resolveUrl(q);if(url)tabNavigate(url)
+  navigate(document.getElementById('home-input').value)
 }
 
 function urlbarKey(e){
-  if(e.key==='Enter'){const url=resolveUrl(document.getElementById('urlbar').value);if(url)tabNavigate(url)}
+  if(e.key==='Enter') navigate(document.getElementById('urlbar').value)
 }
 
-function goHome(){
-  const tab=tabs.find(t=>t.id===activeTabId);if(!tab)return
-  tab.isHome=true;switchTab(activeTabId)
-}
+function navBack(){wv.goBack()}
+function navForward(){wv.goForward()}
+function navReload(){wv.reload()}
 
-newTab()
+wv.addEventListener('did-finish-load', () => {
+  document.getElementById('urlbar').value = wv.getURL()
+})
 </script>
 </body>
 </html>
